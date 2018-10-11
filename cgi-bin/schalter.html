@@ -1,0 +1,35 @@
+#!/usr/bin/perl
+
+my $var;
+local ($buffer, @pairs, $pair, $name, $value, %data);
+# Read in text
+$ENV{'REQUEST_METHOD'} =~ tr/a-z/A-Z/;
+
+if ($ENV{'REQUEST_METHOD'} eq "GET") {
+   $buffer = $ENV{'QUERY_STRING'};
+}
+
+# Split information into name/value pairs
+@pairs = split(/&/, $buffer);
+
+foreach $pair (@pairs) {
+   ($name, $value) = split(/=/, $pair);
+   $value =~ tr/+/ /;
+   $value =~ s/%(..)/pack("C", hex($1))/eg;
+   $data{$name} = $value;
+}
+
+$first_name = $data{first_name};
+$last_name  = $data{last_name};
+
+if ( $data{play} != 0) {
+	$var = qx(sudo -u pi xmms2 play);
+} else {
+	$var = "Test";
+}
+
+
+print "Content-type:text/plain\r\n\r\n";
+print "$var";
+
+1;
