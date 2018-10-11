@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<canvas id="myCanvas" width="800" height="490" style="border:0px solid #d3d3d3;">
+Your browser does not support the HTML5 canvas tag.</canvas>
+
+<script>
+
+
+//var c = document.getElementById("myCanvas");
+//var ctx = c.getContext("2d");
+
+//alert(document.getElementById("myCanvas").width);
+
+//console.log(Hist.name);
+
+
+//ctx.fillStyle = '#f00';
+//AddPoint(110,100);
+//AddPoint(160,120);
+//AddPoint(210,120);
+
+function setLineColor(){
+}
+
+
+function AddPoint(x,y){
+ctx.beginPath();
+ctx.moveTo(x-5, y);
+ctx.lineTo(x,y-5);
+ctx.lineTo(x+5,y);
+ctx.lineTo(x,y+5);
+ctx.closePath();
+ctx.fill();
+ctx.stroke();
+}
+
+function Histogram(name,title,sizex,sizey,bins,x1,x2,canvasId,type){
+    this.canvas  = document.getElementById(canvasId);
+    this.context = this.canvas.getContext("2d");
+    this.name  = name;
+    this.title = title;
+    this.bins  = bins;
+    this.x1    = x1;
+    this.x2    = x2;
+    this.type  = "line";
+    this.marginleft   = 50;
+    this.marginright  = 10;
+    this.margintop    = 30;
+    this.marginbottom = 30;
+    this.sizeX = this.canvas.width  -this.marginleft - this.marginright;
+    this.sizeY = this.canvas.height -this.margintop  - this.marginbottom;
+    this.value = [];
+    this.valueMin;
+    this.valueMax;
+    this.pixelsBetweenFont  = 20;
+    this.min   = 0;
+    this.max   = 220;
+    this.fillColor = "rgba(41, 95, 181, 0.7)";//"#295fb5";//"#5aed68";
+    this.binwidth = (this.x2 - this.x1)/ this.bins;
+    this.binwidth_real = this.sizeX / this.bins;
+}
+
+Histogram.prototype.DrawLine = function(x1,y1,x2,y2){
+  //alert("TEST "+ x1 +" "+ x2 +" "+ y1 +" "+y2);
+  
+  this.context.lineTo(x2,y2);
+  return true;
+}
+
+
+
+Histogram.prototype.Draw = function(){
+  var type= this.type;
+  
+  switch(type) {
+    case "hist":
+        //code block
+        break;
+        
+    default:
+        var lowerBorder   = this.canvas.height - this.marginbottom;
+        //alert(this.binwidth_real);
+        this.context.beginPath();
+        //this.context.moveTo(this.marginleft, lowerBorder);
+        var start      = 0;
+        var max_Entry  = 0;
+        
+        var borderUp    = this.canvas.height - this.margintop;
+        var borderLow   = this.canvas.height - this.marginbottom;
+        var borderLeft  = this.marginleft;
+        var borderRight = this.canvas.width - this.marginright;
+        
+        var steps = parseInt(((borderLow - this.margintop-20)/this.pixelsBetweenFont)+0.5);//alert(steps);
+        var scaling     = steps/11;
+        //color InFill
+        this.context.fillStyle = this.fillColor;
+        var overMax = false;
+        for (var i=0; i<=this.bins;i++){
+          var val = this.value[i];
+          if (this.value[i] != undefined){
+            
+            if (start==0) {
+              this.context.moveTo(this.marginleft + i*this.binwidth_real,lowerBorder);
+              if (val>this.max){
+                this.context.lineTo(this.marginleft + i*this.binwidth_real,lowerBorder - (this.max)*scaling);
+              }
+              start = 1;
+            }
+            
+            if (val >= this.min && val<=this.max && overMax === false) {
+              
+              this.context.lineTo(this.marginleft + i*this.binwidth_real,lowerBorder - val*scaling);
+              overMax = false;
+            } else if(val > this.max ||(val<=this.max && val>=this.min && overMax === true)) {
+              var x_pos;
+              //transition lower to higher
+              if ( val - this.value[max_Entry] === 0) {
+                x_pos = val;
+              } else {
+                x_pos = ((this.max-this.value[max_Entry]))*((i-max_Entry))/(val - this.value[max_Entry]);
+              }
+              //alert("DEB: "+overMax+"  "+x_pos+"  "+val);
+              this.context.lineTo(this.marginleft + (max_Entry+x_pos)*this.binwidth_real,lowerBorder- this.max*scaling);
+              if (val > this.max){
+                overMax = true;
+              } else {
+                overMax = false;
+                i--;
+              }
+              //transition higher to lower
+            }
+            
+            max_Entry = i;
+          }
+          if (i === this.bins && this.value[i]>this.max) {
+            this.context.lineTo(this.marginleft + i*this.binwidth_real,lowerBorder-this.max*scaling);
+          }  
+         }
+        this.context.lineTo(this.marginleft + max_Entry*this.binwidth_real,lowerBorder);
+        this.context.closePath();
+        this.context.fill();
+        
+        //Line InFill
+        this.context.beginPath();
+        start=0;
+        var before;
+        var above = false;
+        for (var i=0; i<=this.bins;i++){
+          if (this.value[i]!= undefined){
+            if (start==0) {
+              //this.context.lineWidth=0;
+              if ( this.value[i] <= this.max) {
+                //alert(i);
+                this.context.moveTo(this.marginleft + i*this.binwidth_real,lowerBorder - this.value[i]*scaling);
+                above = false;
+              } else {
+                //out of range
+                //calculate start point right.
+                var old = this.value[before];
+                var val = this.value[i];
+                var x_pos;
+                if ( val - this.value[before] === 0) {
+                  x_pos = val;
+                } else {
+                  x_pos = ((this.max-this.value[before]))*((i-before))/(val - this.value[before]);
+                }
+                //this.context.stroke();
+                //this.context.beginPath();
+                this.context.moveTo(this.marginleft + (before+x_pos)*this.binwidth_real,lowerBorder- this.max*scaling);
+                above = true;
+              }
+              start =1;
+            } else {  //start=1
+              var x_pos;
+              
+              if ( this.value[i] <= this.max) {
+                if (above == false) {
+                  this.context.lineTo(this.marginleft + i*this.binwidth_real,lowerBorder - this.value[i]*scaling);
+                } else {
+                  //this.context.stroke();
+                  //this.context.beginPath();
+                  alert(i);
+                  var old = this.value[before];
+                  var val = this.value[i];
+                
+                  if ( val - this.value[before] === 0) {
+                    x_pos = val;
+                  } else {
+                    x_pos = ((this.max-old))*((i-before))/(val - old);
+                  }
+                  
+                  this.context.moveTo(this.marginleft + (before+x_pos)*this.binwidth_real,lowerBorder - this.max*scaling);
+                  if(i == (this.bins)) this.context.lineTo(this.marginleft + i*this.binwidth_real,lowerBorder - this.value[i]*scaling);
+                  //alert(above+" " + i);
+                }
+                above = false;
+              } else { //out of range
+                var old = this.value[before];
+                var val = this.value[i];
+                
+                if ( val - this.value[before] === 0) {
+                  x_pos = val;
+                } else {
+                  x_pos = ((this.max-old))*((i-before))/(val - old);
+                }
+                
+               // if (above = true) {
+                  // draw nothing
+                 // alert("Draw");
+               // } else {
+                  //alert(before+x_pos+" "+above);
+                  //alert("Draw");
+                  this.context.lineTo(this.marginleft + (before+x_pos)*this.binwidth_real,lowerBorder-this.max*scaling);
+                  this.context.stroke();
+                  this.context.beginPath();
+                  
+               // }
+                
+                above = true;
+              }
+            }
+            before = i;
+          }
+         }
+
+        this.context.stroke();
+
+  }
+}
+
+Histogram.prototype.DrawGitterVert = function(){
+  var lowerBorder   = this.canvas.height - this.marginbottom;
+  this.context.beginPath();
+  var LabelSteps     = (this.x2 -this.x1);
+  var XLabelStepSize = (this.bins / LabelSteps);
+  this.context.fillStyle = "rgba(0, 0, 0, 0.2)";
+  this.context.setLineDash([5, 15]);
+  for (var i=1; i<XLabelStepSize;i++){
+        //this.context.lineWidth=0;
+        this.context.moveTo(this.marginleft + i*this.binwidth_real*XLabelStepSize,lowerBorder);start=1;  
+        this.context.lineTo(this.marginleft + i*this.binwidth_real*XLabelStepSize,this.margintop);
+   }
+  
+  this.context.stroke();
+  this.context.setLineDash([1, 0]);
+  this.context.fillStyle = this.fillColor;
+}
+
+Histogram.prototype.Init = function(){
+}
+
+Histogram.prototype.Add = function(x,value){
+  var binEntry = parseInt((x)*(this.bins/(this.x2-this.x1))+0.5);
+  //alert(binEntry);
+  if (this.value[binEntry] === undefined) {
+    this.value[binEntry] = value;
+  } else {
+    this.value[binEntry] += value;
+  }
+  if (this.valueMin === undefined || this.valueMin > value) {
+    this.valueMin = value;
+  }
+  if (this.valueMax === undefined || this.valueMax < value) {
+    this.valueMax = value;
+  }
+}
+
+
+/**********************************************
+*               Axis                          *
+***********************************************/
+
+function XAxis(){
+  this.fontColor = "#000";
+  this.lineColor = "#000";
+  this.Draw = function(){
+     this.context.beginPath();
+     this.context.moveTo(this.marginleft , this.canvas.height - this.marginbottom);//this.canvas.height - 30);
+     this.context.lineTo(this.marginleft+this.sizeX+10/*this.canvas.width - this.marginright*/,this.canvas.height - this.marginbottom);
+     this.context.strokeStyle = this.lineColor;
+     this.context.stroke();
+     
+     //x-labels
+     this.context.fillStyle = this.fontColor;
+     var binwidth = (this.x2 - this.x1)/ this.bins;
+     this.context.beginPath();
+     for (var i=this.x1;i<=this.x2;i++){
+       this.context.fillText(i,this.marginleft-3+i*(this.sizeX/(this.x2-this.x1)),this.canvas.height - 20);
+       this.context.moveTo(this.marginleft+i*(this.sizeX/(this.x2-this.x1)),this.canvas.height - this.marginbottom);
+       this.context.lineTo(this.marginleft+i*(this.sizeX/(this.x2-this.x1)),this.canvas.height - this.marginbottom-8);
+     }
+     this.context.stroke();
+  }
+}
+
+function YAxis(){
+  this.fontColor = "#000";
+  this.lineColor = "#000";
+  this.Draw = function(){
+     this.context.beginPath();
+     this.context.fillStyle = this.fontColor;
+     this.context.moveTo(this.marginleft , this.canvas.height - this.marginbottom);//this.canvas.height - 30);
+     this.context.lineTo(this.marginleft , this.margintop  );
+     this.context.strokeStyle = this.lineColor;
+     this.context.stroke();
+     var pixelsBetweenFont = this.pixelsBetweenFont;
+     //y-labels
+     this.context.fillStyle = this.fontColor;
+     var minimum = this.min;
+     var maximum = this.max;
+     var diff    = maximum - minimum;
+     var distToX = this.canvas.height - this.marginbottom;
+     var steps = parseInt(((distToX - this.margintop-20)/pixelsBetweenFont)+0.5);
+     
+     //autoscaling
+     if (diff === 0) {
+       minimum = this.valueMin;
+       maximum = this.valueMax;
+       diff    = maximum - minimum;
+       //distToX -= minimum;
+     } else {
+       //distToX -= 10;
+       //steps -= 1;
+     }
+     //alert(steps +"  "+diff/steps);
+     this.context.beginPath();
+     for (var i=0;i<=steps;i++){
+       this.context.fillText(parseInt(((minimum + i*(diff/steps))*100)+0.5)/100,10, distToX - i*pixelsBetweenFont+4);
+       //alert(distToX - i*pixelsBetweenFont+4);
+       this.context.moveTo(this.marginleft,distToX - i*pixelsBetweenFont);
+       this.context.lineTo(this.marginleft+5,distToX - i*pixelsBetweenFont);
+     }
+     this.context.stroke();
+  }
+}
+
+
+////////////////////////////////////////////////////////////////////
+var H1 = new Histogram("Test","Test1",350,500,101,0,10,"myCanvas");
+var XAxis = new XAxis();
+var YAxis = new YAxis();
+Object.setPrototypeOf(XAxis,H1);
+Object.setPrototypeOf(YAxis,H1);
+//H1.Init();
+//alert(H1.binwidth);
+H1.Add(0,209);
+H1.Add(2,150);
+H1.Add(3,150);
+H1.Add(4,40);
+H1.Add(5,200);
+H1.Add(6,200);
+H1.Add(7,280);
+H1.Add(9,250);
+H1.Add(10,160);
+//H1.DrawGitterVert();
+H1.Draw();
+
+XAxis.Draw();
+YAxis.Draw();
+
+//H1.DrawLine(110,100,160,120);
+//H1.DrawLine(160,120,210,120);
+</script>
+
+</body>
+</html>

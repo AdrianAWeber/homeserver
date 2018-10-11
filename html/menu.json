@@ -1,0 +1,10 @@
+{
+    "Schlafzimmer"    : {
+        "Temperatur": "20"
+    }, 
+    "Bad"     :"",
+    "Wohnzimmer": {
+        "Temperatur": "21",
+        "Luftfeuchte": "50"
+    }
+}
