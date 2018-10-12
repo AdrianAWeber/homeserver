@@ -1,7 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
+<title>EPICS ARCHIVER</title>
+
+   <meta charset="UTF-8">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+   <title>Reading object from the JSON file</title>
+
+
 <style>
+@LeftWidth = 350px;
+
 body {
     margin:0;
     font-family: Helvetica;
@@ -23,7 +33,7 @@ body {
 
 .top-menu {
     float: left;
-    width: 150px;
+    width: 350px;
 }
 
 .top-menu-select {
@@ -70,7 +80,7 @@ body {
     list-style-type: none;
     margin: 0;
     padding: 0;
-    width: 150px;
+    width: 350px;
     background-color: white;
     position: fixed;
     height: 100%;
@@ -85,7 +95,7 @@ body {
     text-decoration: none;
     background-color: #dbdbdb;
     border-bottom: 1px solid #fefefe;
-    width: 150px;
+    width: 350px;
     margin:0;
     transition: 0.4s;
 }
@@ -109,7 +119,7 @@ body {
     text-decoration: none;
     background-color: #ced5e0;/*#b5c0e2;*/
     border-bottom: 1px solid #fefefe;
-    width:130px;
+    width:330px;
 }
 
 /*.side-menu-drop .side-active {
@@ -133,15 +143,16 @@ body {
 }
 
 #main-frame {
-    margin-left:10%;
+    margin-left:350px;
     margin-top: 50px;
     background-color:#f4f4f4;
-    height:1500px;
+    height: 1000px;
     padding-left: 20px;
     padding-top: 6px;
     padding-right: 20px;
     padding-bottom: 6px;
     transition: margin-top 0.5s;
+    min-height: 100%;
 }
 
 #myBtn {
@@ -170,23 +181,28 @@ body {
 }
 
 </style>
+
+
 </head>
+
 <body>
 
 <div>
     <ul class="top-menu-ul">
-        <li class="top-menu"> <a class="active-top" style="color: white" href="#home">Home</a></li>
-        <li class="top-menu"> <a href="#news">News</a></li>
-        <li class="top-menu"> <a href="#weather">Wetter</a></li>
-        <li class="top-menu"> <a href="settings.html">Einstellungen</a></li>
+        <li class="top-menu"> <a class="active-top" style="color: white" href="index.html">Home</a></li>
     </ul>
     <div class="top-menu-select" onclick="topmenuselect()"><a href="#select">&#9776;</a></div>
+    <!--div class="top-menu-select" onclick="closeSideMenuDrop()" style="left=500px;"><a href="#select"> A</a></div-->
 </div>
 <div class="main-frame-container">
     <ul id="side-menu" class="side-menu-ul">
     </ul>
 
     <div id="main-frame">
+    <!--iframe  width="100%" height="100%" style="border:0px;" src="file:///home/adrian/jsroot/demo/read_test_json.htm"> </iframe-->
+    <!--iframe  width="100%" height="100%" style="border:0px;" src="read_test_json.htm"> </iframe-->
+    <div id="drawing" style="width:800px; height:600px"></div>
+    <!--div id="drawing" style="width:800px; height:600px"></div-->
     </div>
     <button onclick="topFunction()" id="myBtn" title="Go to top">Top</button>
 </div>
@@ -195,10 +211,13 @@ body {
 
 
 <script>
-getdata("file:///C:/Users/adria/Desktop/database/menu.json",createSideMenu);
-//getdata('/cgi-bin/getjson.cgi?menu',createSideMenu);
+//getdata("file:///home/adrian/git/homeserver/html/menu.json",createSideMenu);
+getdata('/cgi-bin/getMenuDB.cgi?menu',createSideMenu);
 document.getElementsByClassName("top-menu-ul")[0].style.marginTop = "0px";
 //document.getElementById("main-frame").style.marginTop = "0px";
+
+var InoutValue = window.location.hash.substr(1).split("#");
+
 
 window.onscroll = function() {scrollFunction()};
 
@@ -222,20 +241,23 @@ function createSideMenu(d){
 
         var cnt=0;
         for (var i in data) {
-            putSideMenu(i,"",Object.keys(data[i]).length);
+            putSideMenu(i,"",Object.keys(data[i]).length,"");
             for (var j in data[i]) {
-                putSideMenu(j,i,0);
+                putSideMenu(j,i,0,data[i][j]);
             }
         }
+       closeSideMenuDrop();
+       LoadHist();
     } 
   catch (e) {
     }
 }
 
-function putSideMenu(Name,Parent,numChild){
+
+function putSideMenu(Name,Parent,numChild,chNum){
     var li = document.createElement("LI");
 
-    li.id = "li_s_menu_" + Name+"_" + Parent+"_";
+    li.id = "li_s_menu_" + Name+ "_" + Parent+"_";
     //var div = document.createElement("div"); 
     var t0 = document.createElement("P");
     if (Parent == ""){
@@ -243,19 +265,23 @@ function putSideMenu(Name,Parent,numChild){
     } else {
        t0.className = "side-menu-drop";
     }
-    t0.id = "s_menu_" + Name+"_" + Parent+"_" ;
+    t0.id = "s_menu_" + Name +"_" + Parent+"_" ;
     t0.innerHTML = Name;
     t0.onclick = function() {
         selectSideMenu(this,this.parentNode);
         document.body.scrollTop = 0;
         document.documentElement.scrollTop = 0;
     };
-    li.appendChild(t0); 
+    var sub = document.createElement("P");
+    sub.innerHTML= chNum;
+    sub.style.display = 'none';
+    t0.appendChild(sub);
+    li.appendChild(t0);
     
     if (Parent == "" && numChild != 0) {
         var t1 = document.createElement("P");
-        t1.innerHTML = '&#9650;';
-        t1.id = "smenusel_" + Name+"_" + Parent+"_" ;
+        t1.innerHTML = '&#9660;';
+        t1.id = "smenusel_"+ Name +"_" + Parent+"_" ;
         t1.className="side_menu_select";
         t1.onclick = function() {
             selectSideMenu(this,this.parentNode);
@@ -284,10 +310,10 @@ function selectSideMenu(main_in,i){
             //change icon
             t1.innerHTML = '&#9650;';
             // show subElement
-            childLIs[j].style.display = "block";
+            childLIs[j].style.display = 'block';
         } else {
             t1.innerHTML = '&#9660;';
-            childLIs[j].style.display = "none";
+            childLIs[j].style.display = 'none';
         }
       }
     }
@@ -296,24 +322,35 @@ function selectSideMenu(main_in,i){
     }
     el = document.getElementById(i.id.slice(3,));
     el.className = "side-active " + el.className;
-    
+    LoadHist(main_in.childNodes[1].innerHTML);
     //DELETE OLD NODES
+   /* var main = document.getElementById("main-frame");
+    var mainChild = document.getElementById("main-frame").childNodes;
+    if (mainChild.length > 0) {
+        for (var j=0;j<mainChild.length;j++){
+           main.removeChild(mainChild[j]);
+        }
+    }*/
+    //CREATE NEW NODES
+      //insertToMain(main,i.id,main_in.childNodes[1].innerHTML);
+}
+function insertToMain(main,name,chNum) {
+
     var main = document.getElementById("main-frame");
     var mainChild = document.getElementById("main-frame").childNodes;
     if (mainChild.length > 0) {
         for (var j=0;j<mainChild.length;j++){
-            if (mainChild[j].nodeName != "#text"){ 
-                mainChild[j].parentNode.removeChild(mainChild[j]);
-            }
+           main.removeChild(mainChild[j]);
         }
     }
-    //CREATE NEW NODES
-    insertToMain(main,i.id);
-}
-function insertToMain(main,name) {
+    
+    var h0 = document.createElement("H3");
+    var t0 = document.createTextNode(name.slice(10,name.indexOf("_",11)));
+    h0.appendChild(t0);
+    main.appendChild(h0);
     var P = document.createElement("P");
-    var t = document.createTextNode("TEST" + name);
-    P.appendChild(t);
+    var t1 = document.createTextNode(chNum);
+    P.appendChild(t1);
     main.appendChild(P);
 }
 
@@ -356,5 +393,28 @@ function sidemenuselect(){
   }
 }
 
+function closeSideMenuDrop(){
+  var childLIs = document.getElementsByTagName("LI");
+  for(var i=0;i<childLIs.length;i++){
+    var name = childLIs[i].id;
+    if (name !== "" &&  name.slice(-2) !== "__") childLIs[i].style.display = 'none';
+  }
+} 
+
 </script>
+
+   <script src="../scripts/JSRootCore.js" type="text/javascript"></script>
+
+   <script type='text/javascript'>
+   function LoadHist(chNum){
+     if (chNum !== "") {
+      // json file stored in same folder, absolute address can be used as well
+      JSROOT.NewHttpRequest("/cgi-bin/getHistJson.cgi?"+InoutValue, 'object', function(obj) { //test_perl.json
+         JSROOT.draw("drawing", obj, "CF");//*LF2
+      }).send();
+     } 
+   }
+   </script>
+
+   
 </html>

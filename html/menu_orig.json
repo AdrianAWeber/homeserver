@@ -1,0 +1,16 @@
+{
+    "MVD"    : {
+        "Temperatur": ""
+    }, 
+    "Magnet" : {
+        "TEST":""
+    },
+    "RICH700HV"   : {
+        "HAD:RICH:HV:CR1:0:0:0:Control:setOn": "",
+        "HAD:RICH:HV:CR1:0:0:1:Control:setOn": ""
+    },
+    "richTemperatures"   : {
+        "HAD:RICH:TrbNet:Combiner:0xfe52:RREG:Temperatur": "",
+        "HAD:RICH:TrbNet:DiRICH:0xfe51:RREG:Temperatur": ""
+    }
+}

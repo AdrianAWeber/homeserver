@@ -12,38 +12,52 @@ my @args = split('-',$ENV{'QUERY_STRING'});
   print "Content-type: application/json\r\n\r\n";
 
 my $driver   = "Pg"; 
-my $database = "homeserver";
+my $database = "archive";
 my $dsn = "DBI:$driver:dbname = $database;host = 127.0.0.1;port = 5432";
-my $userid = "postgres";
-my $password = "\$postgres";
+my $userid = "report";
+my $password = "\$report";
 my $dbh = DBI->connect($dsn, $userid, $password, { RaiseError => 1 })
    or die $DBI::errstr;
-#print "Opened database successfully\n";
+print "Opened database successfully\n";
 
-my $stmt = qq(SELECT rooms.Name, sensors.Name FROM ((rooms INNER JOIN boards ON rooms.Id = boards.room_Id) INNER JOIN sensors ON boards.Id = sensors.board_Id) ORDER BY rooms.Name ASC;);
+
+## Display all tables and views in the public schema:
+#my $sth = $dbh->table_info('', 'public', undef, undef);
+#for my $rel (@{$sth->fetchall_arrayref({})}) {
+#  print "$rel->{TABLE_TYPE} name is $rel->{TABLE_NAME}\n";
+#}
+
+my $stmt = qq(SELECT * FROM sample WHERE channel_id='7471' ORDER BY smpl_time DESC LIMIT 10;);#7783#15167
+#my $stmt = qq(SELECT * FROM (channel INNER JOIN chan_grp ON channel.grp_id = chan_grp.grp_id););
+
 my $sth = $dbh->prepare( $stmt );
 my $rv = $sth->execute() or die $DBI::errstr;
 if($rv < 0) {
-#   print $DBI::errstr;
+   print $DBI::errstr;
 }
+
+
 #print "\{\n";
-my $curr_Room = "";
-print "{\n";
+
+my $fields = $sth->{NAME};
+print Dumper $fields;
+
+
+print $sth->{'float_val'}."\n";
+
 while(my @row = $sth->fetchrow_array()) {
-     #print "{\n"; 
-     if ($curr_Room ne $row[0]) {
-       if ($curr_Room ne "") { 
-         print "},\n";
-       }
-       print "\"$row[0]\" : {\n";
-     } else {
-       print ",\n";
-     }
-     print "\"$row[1]\" : \"\"";
-#     print "\"sensor\" : \"". $row[1] . "\"\n";
-     #print "}\n";
-     $curr_Room = $row[0];
+my $size = @row;
+
+for (my $i=0;$i<$size;$i++){
+     print " |$i: ".$row[$i]."   ";
 }
-print "}\n}\n";
+     print "\n";
+#print $row[1]. "  ". $row[6]  ."\n";
+#my $test = @row;
+#print Dumper @row;
+}
+
+
+
 #print "Operation done successfully\n";
 $dbh->disconnect();
