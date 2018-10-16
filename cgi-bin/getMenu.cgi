@@ -27,9 +27,12 @@ print "Opened database successfully\n";
 #  print "$rel->{TABLE_TYPE} name is $rel->{TABLE_NAME}\n";
 #}
 
-my $stmt = qq(SELECT * FROM sample WHERE channel_id='7471' ORDER BY smpl_time DESC LIMIT 10;);#7783#15167
+#my $stmt = qq(SELECT * FROM Array_Val WHERE channel_id='7474' LIMIT 1000;);
+my $stmt = qq(SELECT * FROM sample WHERE channel_id='7478' AND status_id='5' ORDER BY smpl_time DESC LIMIT 100;);#7783#15167
 #my $stmt = qq(SELECT * FROM (channel INNER JOIN chan_grp ON channel.grp_id = chan_grp.grp_id););
 
+#my $stmt = qq(SELECT S.*, A.* FROM sample S INNER JOIN Array_Val A ON S.smpl_time=A.smpl_time WHERE S.channel_id=A.channel_id AND S.channel_id='15168' ORDER BY S.smpl_time DESC LIMIT 1800;);
+#my $stmt = qq(SELECT * FROM Array_Val WHERE channel_id='7485' LIMIT 1000;);
 my $sth = $dbh->prepare( $stmt );
 my $rv = $sth->execute() or die $DBI::errstr;
 if($rv < 0) {
@@ -42,12 +45,10 @@ if($rv < 0) {
 my $fields = $sth->{NAME};
 print Dumper $fields;
 
-
-print $sth->{'float_val'}."\n";
-
+my $isArrayVal = 0;
 while(my @row = $sth->fetchrow_array()) {
 my $size = @row;
-
+$isArrayVal = 1;
 for (my $i=0;$i<$size;$i++){
      print " |$i: ".$row[$i]."   ";
 }
@@ -57,6 +58,7 @@ for (my $i=0;$i<$size;$i++){
 #print Dumper @row;
 }
 
+print("is Array: $isArrayVal \n");
 
 
 #print "Operation done successfully\n";

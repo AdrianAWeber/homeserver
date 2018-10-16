@@ -20,7 +20,7 @@ my $dbh = DBI->connect($dsn, $userid, $password, { RaiseError => 1 })
    or die $DBI::errstr;
 #print "Opened database successfully\n";
 
-my $stmt = qq(SELECT chan_grp.NAME,channel.NAME,channel.channel_ID  FROM (channel INNER JOIN chan_grp ON channel.grp_id = chan_grp.grp_id) ORDER BY chan_grp.Name ASC, channel.Name ASC;);
+my $stmt = qq(SELECT chan_grp.NAME,channel.NAME,channel.channel_ID  FROM (channel INNER JOIN chan_grp ON channel.grp_id = chan_grp.grp_id) WHERE chan_grp.eng_id='2' ORDER BY chan_grp.Name ASC, channel.Name ASC;);
 my $sth = $dbh->prepare( $stmt );
 my $rv = $sth->execute() or die $DBI::errstr;
 if($rv < 0) {

@@ -24,6 +24,7 @@ sub XAxis{ # xNBINS,xBins,stepsize,AxisTITLE
    my $xAxisTitle = $_[3];
    my $min = $_[4];
    my $max = $_[5];
+   my $TimeStamp = $_[6];
    $string .= "\"fXaxis\" : { \n";
    $string .= "\"_typename\" : \"TAxis\",\n";
    $string .= "\"fBits\" : 0,\n";
@@ -33,11 +34,11 @@ sub XAxis{ # xNBINS,xBins,stepsize,AxisTITLE
    $string .= "\"fAxisColor\" : 1,\n";
    $string .= "\"fLabelColor\" : 1,\n";
    $string .= "\"fLabelFont\" : 42,\n";
-   $string .= "\"fLabelOffset\" : 5.000000e-03,\n";
-   $string .= "\"fLabelSize\" : 3.500000e-02,\n";
+   $string .= "\"fLabelOffset\" : 2.000000e-03,\n";
+   $string .= "\"fLabelSize\" : 2.000000e-02,\n";
    $string .= "\"fTickLength\" : 3.000000e-02,\n";
    $string .= "\"fTitleOffset\" : 1.000000e+00,\n";
-   $string .= "\"fTitleSize\" : 3.500000e-02,\n";
+   $string .= "\"fTitleSize\" : 2.500000e-02,\n";
    $string .= "\"fTitleColor\" : 1,\n";
    $string .= "\"fTitleFont\" : 42,\n";
    $string .= "\"fNbins\" : ". $xNBin .",\n";
@@ -52,8 +53,8 @@ sub XAxis{ # xNBINS,xBins,stepsize,AxisTITLE
    $string .= "\"fFirst\" : 0,\n";
    $string .= "\"fLast\" : 0,\n";
    $string .= "\"fBits2\" : 0,\n";
-   $string .= "\"fTimeDisplay\" : false,\n";
-   $string .= "\"fTimeFormat\" : \"\",\n";
+   $string .= "\"fTimeDisplay\" : true,\n";
+   $string .= "\"fTimeFormat\" : \"\%Y-\%m-\%d \%H:\%M:\%S\%F".$TimeStamp."\",\n";
    $string .= "\"fLabels\" : null\n";
    $string .= "},\n";
    return $string;
@@ -167,23 +168,52 @@ sub Legend(){
 
 sub Values(){
   my $string;
-  my $xNBin = shift;
+  my $xNBin       = shift;
   my $NEntriesRef = shift;
-  my $NEntries = ${$NEntriesRef};
-  my @val = @_;
+  my $NEntries    = ${$NEntriesRef};
+  my $border      = shift;
+  my @tmp_a       = @_;
+  my @val;
+  my @time;
+  
+  my $arraysize = @tmp_a;
+  for(my $i=0;$i<$arraysize;$i++){
+    if ($i < $border) {
+      $val[$i] = $tmp_a[$i];
+    } else {
+      $time[$i-$border] = $tmp_a[$i];
+    }
+  }
+  
+  #print Dumper @time;
   #print ${$NEntries}."\n";
   
   $string .= "\"fArray\" : {\n";
   my $sizeArray = @val;
+  my $EntryCnt = 0;
+  my $timeCnt  = 0;
   for (my $i=0;$i<$xNBin;$i++){
     $string .= ",\n" if ($i!=0);
     $string .= "\"".($i+1)."\" : ";
-    if ($i < $sizeArray) {
-      $string .= $val[$i];
-      $NEntries += $val[$i];
+    if ($EntryCnt < $sizeArray) { 
+      if ($timeCnt < $time[$EntryCnt+1])  {
+        $string   .= $val[$EntryCnt];
+        $NEntries += $val[$EntryCnt];
+       
+        $timeCnt++;
+        
+      } elsif ($time[$EntryCnt+1] == 0) {
+         $string   .= $val[$EntryCnt];
+        $NEntries += $val[$EntryCnt];
+      } else {
+        #$string   .= " ".$EntryCnt."  ".$time[$EntryCnt+1]." ";
+        #$string   .= "$timeCnt";
+      }#print $timeCnt."\n";
+      if ($timeCnt == $time[$EntryCnt+1]){$EntryCnt++;$timeCnt=0;}
     } else {
       $string .= "0";
     }
+    
   }
   $string .= "\n},\n";
   ${$NEntriesRef} = $NEntries;

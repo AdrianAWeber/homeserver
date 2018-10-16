@@ -3,11 +3,6 @@
 <head>
 <title>EPICS ARCHIVER</title>
 
-   <meta charset="UTF-8">
-   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-
-   <title>Reading object from the JSON file</title>
-
 
 <style>
 @LeftWidth = 350px;
@@ -216,7 +211,7 @@ getdata('/cgi-bin/getMenuDB.cgi?menu',createSideMenu);
 document.getElementsByClassName("top-menu-ul")[0].style.marginTop = "0px";
 //document.getElementById("main-frame").style.marginTop = "0px";
 
-var InoutValue = window.location.hash.substr(1).split("#");
+var inputValue = window.location.hash.substr(1).split("#");
 
 
 window.onscroll = function() {scrollFunction()};
@@ -322,7 +317,7 @@ function selectSideMenu(main_in,i){
     }
     el = document.getElementById(i.id.slice(3,));
     el.className = "side-active " + el.className;
-    LoadHist(main_in.childNodes[1].innerHTML);
+    LoadHist(main_in.childNodes[1].innerHTML,main_in.innerHTML.slice(0,main_in.innerHTML.indexOf("<p ")));
     //DELETE OLD NODES
    /* var main = document.getElementById("main-frame");
     var mainChild = document.getElementById("main-frame").childNodes;
@@ -406,12 +401,23 @@ function closeSideMenuDrop(){
    <script src="../scripts/JSRootCore.js" type="text/javascript"></script>
 
    <script type='text/javascript'>
-   function LoadHist(chNum){
+   
+   function LoadHist(chNum,name){
      if (chNum !== "") {
+     
       // json file stored in same folder, absolute address can be used as well
-      JSROOT.NewHttpRequest("/cgi-bin/getHistJson.cgi?"+InoutValue, 'object', function(obj) { //test_perl.json
-         JSROOT.draw("drawing", obj, "CF");//*LF2
-      }).send();
+      var req_Addr = "/cgi-bin/getHistJson.cgi?"+chNum+"-"+name;
+      /*if (chNum == 1){
+        req_Addr = "/root0.json";
+      } else if(chNum == 2) {
+        req_Addr = "/root1.json";
+      }*/
+      var req = JSROOT.NewHttpRequest(req_Addr, 'object', function(obj) { //test_perl.json
+         JSROOT.redraw('drawing', obj, 'CF');//*LF2
+      });
+      req.send(null);
+      
+      JSROOT.cleanup("drawing");
      } 
    }
    </script>
