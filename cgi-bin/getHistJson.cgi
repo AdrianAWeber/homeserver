@@ -24,7 +24,7 @@ my $dbh = DBI->connect($dsn, $userid, $password, { RaiseError => 1 })
 #print "Opened database successfully\n";
 my $chId;
 if (defined $args[0]) {$chId = $args[0];} else {$chId = 7474;}#7783;
-if ($chId eq "undefined"){ $chId = 7783;}
+#if ($chId eq "undefined"){ $chId = 7783;}
 #print "@args[0]\n";
 my $Limit = 100;
 my $Address = 0;
@@ -172,10 +172,6 @@ my $size= @time;
 }
 
 $TimeStamp = $TimeStamp_oldest;
-#print $xNBin."\n";
-#calculate time diff.
-#calculate binsize
-#
 
 }
 
@@ -188,10 +184,6 @@ if($rv < 0){# print $DBI::errstr;
 
 while(my @row = $sth->fetchrow_array()) {
   $yAxisTitle =$row[0];
-  
-  #print $row[1]. "  ". $row[6]  ."\n";
-  #my $val = $row[6];
-
 }
 
 @val = reverse @val;

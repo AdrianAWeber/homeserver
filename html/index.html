@@ -293,7 +293,7 @@ function selectSideMenu(main_in,i){
     // change bars
     
     var el = document.querySelectorAll("p[class^='side-active']");
-    if (el.length >0) { el[0].className = el[0].className.slice(12,); }
+    if (el.length >0) { el[0].className = el[0].className.slice(12,);el[0].style.backgroundColor=""; }
     var LI_id = i.id.slice(9,-1);
     var childLIs = document.querySelectorAll("li[id$='"+LI_id+"']");
     
@@ -317,6 +317,7 @@ function selectSideMenu(main_in,i){
     }
     el = document.getElementById(i.id.slice(3,));
     el.className = "side-active " + el.className;
+    el.style.backgroundColor="#f4f4f4";
     LoadHist(main_in.childNodes[1].innerHTML,main_in.innerHTML.slice(0,main_in.innerHTML.indexOf("<p ")));
     //DELETE OLD NODES
    /* var main = document.getElementById("main-frame");
