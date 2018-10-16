@@ -7,9 +7,9 @@ use DBI;
 
 my @args = split('-',$ENV{'QUERY_STRING'});
 
-  #print "Cache-Control: no-cache, must-revalidate, max-age=1\r\n";
-  #print "Expires: Thu, 01 Dec 1994 16:00:00 GMT\r\n";
-  #print "Content-type: application/json\r\n\r\n";
+print "Cache-Control: no-cache, must-revalidate, max-age=1\r\n";
+print "Expires: Thu, 01 Dec 1994 16:00:00 GMT\r\n";
+print "Content-type: application/json\r\n\r\n";
 
 my $driver   = "Pg"; 
 my $database = "archive";
