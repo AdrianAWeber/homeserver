@@ -6,8 +6,8 @@ use File::Copy;
 use DBI;
 use Time::Piece;
 
-require "/home/adrian/jsroot/demo/createJson_lib.pl";
-require "/home/adrian/jsroot/demo/timeDiff_lib.pl";
+require "createJson_lib.pl";
+require "timeDiff_lib.pl";
 my @args = split('-',$ENV{'QUERY_STRING'});
 
 print "Cache-Control: no-cache, must-revalidate, max-age=1\r\n";
