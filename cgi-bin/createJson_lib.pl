@@ -195,26 +195,34 @@ sub Values(){
   for (my $i=0;$i<$xNBin;$i++){
     $string .= ",\n" if ($i!=0);
     $string .= "\"".($i+1)."\" : ";
-    if ($EntryCnt < $sizeArray) { 
+    if ($EntryCnt < ($sizeArray-1)) { 
       if ($timeCnt < $time[$EntryCnt+1])  {
         $string   .= $val[$EntryCnt];
         $NEntries += $val[$EntryCnt];
-       
         $timeCnt++;
-        
-      } elsif ($time[$EntryCnt+1] == 0) {
-         $string   .= $val[$EntryCnt];
+      } elsif ($time[$EntryCnt+1] == 0) {## go one back and recalculate
+        $string   .= $val[$EntryCnt];
         $NEntries += $val[$EntryCnt];
       } else {
         #$string   .= " ".$EntryCnt."  ".$time[$EntryCnt+1]." ";
         #$string   .= "$timeCnt";
       }#print $timeCnt."\n";
-      if ($timeCnt == $time[$EntryCnt+1]){$EntryCnt++;$timeCnt=0;}
+      if ($timeCnt == $time[$EntryCnt+1]){
+        $EntryCnt++;
+        $timeCnt=0;
+      }
+    } elsif ($EntryCnt == ($sizeArray-1)) {
+      ## last Entry in TimeArray
+      $string   .= $val[$EntryCnt];
+      $NEntries += $val[$EntryCnt];
     } else {
       $string .= "0";
     }
     
   }
+  ############
+  # How to handle TimeDiff of 0?? -> I calculate the middle value!
+  ############
   $string .= "\n},\n";
   ${$NEntriesRef} = $NEntries;
   return $string;

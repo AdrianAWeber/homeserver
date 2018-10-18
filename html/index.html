@@ -216,6 +216,8 @@ var inputValue = window.location.hash.substr(1).split("#");
 
 window.onscroll = function() {scrollFunction()};
 
+alert("THIS IS A DEVELOPING VERSION!\nThere are many untested things and some bugs. The x-Axis could be off by a view seconds.\nSo please do not look for exact Time-Value correlations");
+
 function scrollFunction() {
     if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
         document.getElementById("myBtn").style.display = "block";
